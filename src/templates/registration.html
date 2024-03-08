@@ -39,7 +39,7 @@
             .then(response => response.json())
             .then(data => {
                 console.log('Success:', data);
-                // Handle success (e.g., display a message or redirect)
+                window.location.href = 'http://localhost:7788';
             })
             .catch((error) => {
                 console.error('Error:', error);
