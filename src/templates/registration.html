@@ -14,11 +14,43 @@
                 confirm_password.setCustomValidity('');
             }
         }
+
+        function submitRegistrationForm(event) {
+            event.preventDefault(); // Prevent the default form submission
+
+            var form = event.target;
+            var formData = {
+                email: form.email.value,
+                password: form.password.value,
+                is_active: true,
+                is_superuser: false,
+                is_verified: false,
+                username: form.username.value,
+                role_id: 0
+            };
+
+            fetch('http://localhost:7788/auth/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Success:', data);
+                // Handle success (e.g., display a message or redirect)
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+                window.alert('Error on registration')
+            });
+        }
     </script>
 </head>
 <body>
     <h2>Registration Form</h2>
-    <form action="http://0.0.0.0:8000/auth/register" method="post" onsubmit="validatePassword()">
+    <form onsubmit="submitRegistrationForm(event)">
         <label for="username">Username:</label><br>
         <input type="text" id="username" name="username" required pattern="[a-zA-Z0-9]+" title="Username should only contain letters and numbers."><br>
 

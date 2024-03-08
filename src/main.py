@@ -21,7 +21,6 @@ app.include_router(
     prefix='/auth',
     tags=['Auth'],
 )
-
 app.include_router(
     fastapi_users.get_register_router(UserRead, UserCreate),
     prefix='/auth',
@@ -30,13 +29,10 @@ app.include_router(
 
 app.include_router(router_pages)
 
-origins = [
-    'http://localhost:7788',
-]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=['http://localhost:7788'],
     allow_credentials=True,
     allow_methods=['GET', 'POST'],
     allow_headers=[
