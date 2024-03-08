@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registration Form</title>
+    <script>
+        function validatePassword() {
+            var password = document.getElementById("password");
+            var confirm_password = document.getElementById("confirm_password");
+            if (password.value !== confirm_password.value) {
+                confirm_password.setCustomValidity("Passwords don't match.");
+            } else {
+                confirm_password.setCustomValidity('');
+            }
+        }
+    </script>
+</head>
+<body>
+    <h2>Registration Form</h2>
+    <form action="http://0.0.0.0:8000/auth/register" method="post" onsubmit="validatePassword()">
+        <label for="username">Username:</label><br>
+        <input type="text" id="username" name="username" required pattern="[a-zA-Z0-9]+" title="Username should only contain letters and numbers."><br>
+
+        <label for="email">Email:</label><br>
+        <input type="email" id="email" name="email" required><br>
+
+        <label for="password">Password:</label><br>
+        <input type="password" id="password" name="password" required minlength="8" oninput="validatePassword()"><br>
+
+        <label for="confirm_password">Confirm Password:</label><br>
+        <input type="password" id="confirm_password" name="confirm_password" required oninput="validatePassword()"><br>
+
+        <input type="submit" value="Register">
+    </form>
+</body>
+</html>

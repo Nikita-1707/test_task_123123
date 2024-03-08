@@ -18,9 +18,6 @@ class UserManager(IntegerIDMixin, BaseUserManager[User, int]):
     reset_password_token_secret = SECRET_AUTH
     verification_token_secret = SECRET_AUTH
 
-    async def on_after_register(self, user: User, request: Optional[Request] = None):
-        print(f'User {user.id} has registered.')
-
     async def create(
         self,
         user_create: schemas.UC,
@@ -43,8 +40,6 @@ class UserManager(IntegerIDMixin, BaseUserManager[User, int]):
         user_dict['role_id'] = 1
 
         created_user = await self.user_db.create(user_dict)
-
-        await self.on_after_register(created_user, request)
 
         return created_user
 
