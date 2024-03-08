@@ -10,13 +10,18 @@
           const email = document.getElementById('email').value;
           const password = document.getElementById('password').value;
 
+          // Constructing a URL-encoded string
+          const formData = new URLSearchParams();
+          formData.append('username', email);
+          formData.append('password', password);
+
           try {
             const response = await fetch('http://localhost:7788/auth/login', {
               method: 'POST',
               headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/x-www-form-urlencoded'
               },
-              body: JSON.stringify({ email, password })
+              body: formData
             });
 
             if (response.ok) {
