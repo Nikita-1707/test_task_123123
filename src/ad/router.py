@@ -2,13 +2,14 @@ from fastapi import APIRouter, Request, Depends, HTTPException, status, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import delete, select, true
 
-from ad.models import ad_table
+from ad.models import ad_table, FieldsForSorting
 from ad.schemas import AdRead, AdCreate, AdTypeEnum
 from auth.base_config import current_user
 from auth.models import User
 from auth.utils import admin_role_id
 from database import get_async_session
 from pagination import Pagination, PaginatedResponse
+from sorter import Sorter
 
 router = APIRouter(
     prefix='/ad',
@@ -48,11 +49,17 @@ async def get_all_ads(
     session: AsyncSession = Depends(get_async_session),
     pagination: Pagination = Depends(),
     ad_type: AdTypeEnum = '',
+    sort_by: str = FieldsForSorting.id,
 ):
+    sorter = Sorter(FieldsForSorting, sort_by)
+
     cond = ad_table.c.type == ad_type if ad_type else true()
 
     result = await session.execute(
-        select(ad_table).where(cond)
+        sorter.apply_sorting(
+            query=select(ad_table).where(cond),
+            table=ad_table,
+        )
     )
     ads = [
         AdRead(

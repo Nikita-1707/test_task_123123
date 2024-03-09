@@ -6,10 +6,11 @@ from ad.router import get_ad_by_id
 from auth.base_config import current_user
 from auth.models import User
 from auth.utils import admin_role_id
-from comment.models import comment_table
+from comment.models import comment_table, FieldsForSorting
 from comment.schemas import CommentRead, CommentCreate
 from database import get_async_session
 from pagination import Pagination, PaginatedResponse
+from sorter import Sorter
 
 router = APIRouter(
     prefix='/comment',
@@ -26,18 +27,28 @@ async def get_comments_by_ad_id(
     ad_id: int,
     session: AsyncSession = Depends(get_async_session),
     pagination: Pagination = Depends(),
+    sort_by: str = FieldsForSorting.id,
 ):
+    sorter = Sorter(FieldsForSorting, sort_by)
+
     # check that ad are existing
     await get_ad_by_id(session, ad_id)
 
-    result = await session.execute(
-        select(
+    sorted_select = sorter.apply_sorting(
+        table=comment_table,
+        query=select(
             comment_table.c.id,
             comment_table.c.text,
             comment_table.c.created_at,
             User.email
-        ).join(User, User.id == comment_table.c.author_id).where(comment_table.c.ad_id == ad_id)
+        ).join(
+            User, User.id == comment_table.c.author_id
+        ).where(
+            comment_table.c.ad_id == ad_id
+        ),
     )
+
+    result = await session.execute(sorted_select)
 
     comments = [
         CommentRead(

@@ -1,4 +1,5 @@
 from datetime import datetime
+from enum import Enum
 
 from sqlalchemy import (
     Column,
@@ -22,3 +23,8 @@ comment_table = Table(
     Column('author_id', ForeignKey(User.id)),
     Column('ad_id', ForeignKey(ad_table.c.id, ondelete='CASCADE')),
 )
+
+
+class FieldsForSorting(str, Enum):
+    id = 'id'
+    created_at = 'created_at'

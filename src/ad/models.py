@@ -1,3 +1,5 @@
+from enum import Enum
+
 from sqlalchemy import (
     JSON,
     Column,
@@ -28,3 +30,9 @@ ad_table = Table(
     Column('type', ad_type_enum),
     Column('author_id', ForeignKey(User.id)),
 )
+
+
+class FieldsForSorting(str, Enum):
+    id = 'id'
+    title = 'title'
+    type = 'type'
