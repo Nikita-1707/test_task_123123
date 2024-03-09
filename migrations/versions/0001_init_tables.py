@@ -7,6 +7,7 @@ Create Date: 2024-03-08 13:38:11.240642
 """
 from alembic import op
 import sqlalchemy as sa
+from sqlalchemy.sql.functions import func
 
 # revision identifiers, used by Alembic.
 revision = 'e4783e8ba21a'
@@ -46,6 +47,16 @@ def upgrade() -> None:
         sa.Column('description', sa.JSON(), nullable=True),
         sa.Column('type', sa.String(), nullable=False),
         sa.Column('author_id', sa.Integer(), sa.ForeignKey('user.id'), nullable=False),
+        sa.PrimaryKeyConstraint('id')
+    )
+
+    op.create_table(
+        'comment',
+        sa.Column('id', sa.Integer(), nullable=False),
+        sa.Column('text', sa.String(), nullable=False),
+        sa.Column('created_at', sa.DateTime(), default=func.now(), nullable=False),
+        sa.Column('author_id', sa.Integer(), sa.ForeignKey('user.id'), nullable=False),
+        sa.Column('ad_id', sa.Integer(), sa.ForeignKey('ad.id'), nullable=False),
         sa.PrimaryKeyConstraint('id')
     )
     # ### end Alembic commands ###
