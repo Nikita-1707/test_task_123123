@@ -10,7 +10,7 @@ from fastapi_users import (
 )
 
 from auth.models import User
-from auth.utils import get_user_db
+from auth.utils import get_user_db, user_role_id
 from config import SECRET_AUTH
 
 
@@ -37,7 +37,7 @@ class UserManager(IntegerIDMixin, BaseUserManager[User, int]):
         )
         password = user_dict.pop('password')
         user_dict['hashed_password'] = self.password_helper.hash(password)
-        user_dict['role_id'] = 1
+        user_dict['role_id'] = user_role_id
 
         created_user = await self.user_db.create(user_dict)
 

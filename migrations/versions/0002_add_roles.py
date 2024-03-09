@@ -8,6 +8,7 @@ Create Date: 2024-03-08 13:39:11.240642
 from alembic import op
 
 from auth.models import client_role
+from auth.utils import user_role_id, admin_role_id
 
 # revision identifiers, used by Alembic.
 revision = 'e4783e8ba21b'
@@ -22,12 +23,12 @@ def upgrade() -> None:
         table=client_role,
         rows=[
             {
-                'id': 1,
+                'id': user_role_id,
                 'name': 'user',
                 'permissions': {},
             },
             {
-                'id': 2,
+                'id': admin_role_id,
                 'name': 'admin',
                 'permissions': {},
             },

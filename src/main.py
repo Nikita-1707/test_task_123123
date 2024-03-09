@@ -1,13 +1,18 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends, HTTPException, status, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
+from sqlalchemy import select, update
+from sqlalchemy.ext.asyncio import AsyncSession
 from redis import asyncio as aioredis
 
-from auth.base_config import auth_backend, fastapi_users
+from auth.base_config import auth_backend, fastapi_users, current_user
+from auth.models import User
 from auth.schemas import UserCreate, UserRead
+from auth.utils import admin_role_id
 from config import REDIS_HOST, REDIS_PORT
+from database import get_async_session
 from pages.router import router as router_pages
 from ad.router import router as router_ad
 from comment.router import router as router_comment
@@ -33,7 +38,6 @@ app.include_router(router_pages)
 app.include_router(router_ad)
 app.include_router(router_comment)
 
-
 app.add_middleware(
     CORSMiddleware,
     allow_origins=['http://localhost:7788'],
@@ -53,3 +57,37 @@ app.add_middleware(
 async def startup_event():
     redis = aioredis.from_url(f'redis://{REDIS_HOST}:{REDIS_PORT}', encoding='utf8', decode_responses=True)
     FastAPICache.init(RedisBackend(redis), prefix='test_task_cache')
+
+
+@app.post('/admin')
+async def add_user_to_admin(
+    user_id: int,
+    user: User = Depends(current_user),
+    session: AsyncSession = Depends(get_async_session),
+):
+    if user.role_id != admin_role_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail='You do not have enough permissions to perform this operation.'
+        )
+
+    result = await session.execute(
+        select(User).where(User.id == user_id)
+    )
+
+    user_to_promote = result.one_or_none()
+
+    if not user_to_promote:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f'User with id {user_id} not found.'
+        )
+
+    await session.execute(
+        update(User).where(User.id == user_id).values(
+            role_id=admin_role_id
+        )
+    )
+    await session.commit()
+
+    return Response(status_code=status.HTTP_204_NO_CONTENT)

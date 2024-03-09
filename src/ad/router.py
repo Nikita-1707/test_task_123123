@@ -8,6 +8,7 @@ from ad.models import ad_table
 from ad.schemas import AdRead, AdCreate
 from auth.base_config import current_user
 from auth.models import User
+from auth.utils import admin_role_id
 from database import get_async_session
 
 router = APIRouter(
@@ -103,8 +104,6 @@ async def delete_ad(
     )
     ad_to_delete = result.one_or_none()
 
-    if_admin = user.role_id == 2
-
     if not ad_to_delete:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -112,7 +111,7 @@ async def delete_ad(
         )
 
     if (
-        not if_admin
+        user.role_id != admin_role_id
         and ad_to_delete.author_id != user.id
     ):
         raise HTTPException(

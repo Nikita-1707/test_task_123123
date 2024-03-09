@@ -7,6 +7,7 @@ from sqlalchemy import delete, select
 from ad.router import get_ad_by_id
 from auth.base_config import current_user
 from auth.models import User
+from auth.utils import admin_role_id
 from comment.models import comment_table
 from comment.schemas import CommentRead, CommentCreate
 from database import get_async_session
@@ -74,7 +75,7 @@ async def delete_comment(
     user: User = Depends(current_user),
     session: AsyncSession = Depends(get_async_session),
 ):
-    if user.role_id == 1:
+    if user.role_id != admin_role_id:
         return Response(
             status_code=status.HTTP_403_FORBIDDEN,
             content='You do not have enough permissions to perform this operation.',
