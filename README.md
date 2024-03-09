@@ -30,10 +30,10 @@ docker-compose build
 
 ### Executing program
 
-To start the program, just run the bash script located at src/docker/app.sh:
+To start the program, just run the bash script located at docker/app.sh:
 
 ```bash
-bash src/docker/app.sh
+bash docker/app.sh
 ```
 Or, you can use docker-compose up to bring up a Docker container:
 
