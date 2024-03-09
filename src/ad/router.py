@@ -1,5 +1,3 @@
-from typing import List
-
 from fastapi import APIRouter, Request, Depends, HTTPException, status, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import delete, select
@@ -10,6 +8,7 @@ from auth.base_config import current_user
 from auth.models import User
 from auth.utils import admin_role_id
 from database import get_async_session
+from pagination import Pagination, PaginatedResponse
 
 router = APIRouter(
     prefix='/ad',
@@ -42,22 +41,25 @@ async def get_ad_by_id(
 
 @router.get(
     '/',
-    response_model=List[AdRead],
+    response_model=PaginatedResponse[AdRead],
 )
 async def get_all_ads(
     request: Request,
     session: AsyncSession = Depends(get_async_session),
+    pagination: Pagination = Depends(),
 ):
     result = await session.execute(
         select(ad_table)
     )
-    return [
+    ads = [
         AdRead(
             id=ad.id,
             title=ad.title,
             description=ad.description,
         ) for ad in result.all()
     ]
+
+    return pagination.paginate_items(ads)
 
 
 @router.get(

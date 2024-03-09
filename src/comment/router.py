@@ -1,5 +1,3 @@
-from typing import List
-
 from fastapi import APIRouter, Request, Depends, HTTPException, status, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import delete, select
@@ -11,6 +9,7 @@ from auth.utils import admin_role_id
 from comment.models import comment_table
 from comment.schemas import CommentRead, CommentCreate
 from database import get_async_session
+from pagination import Pagination, PaginatedResponse
 
 router = APIRouter(
     prefix='/comment',
@@ -20,12 +19,13 @@ router = APIRouter(
 
 @router.get(
     '/',
-    response_model=List[CommentRead],
+    response_model=PaginatedResponse[CommentRead],
 )
 async def get_comments_by_ad_id(
     request: Request,
     ad_id: int,
     session: AsyncSession = Depends(get_async_session),
+    pagination: Pagination = Depends(),
 ):
     # check that ad are existing
     await get_ad_by_id(session, ad_id)
@@ -39,16 +39,16 @@ async def get_comments_by_ad_id(
         ).join(User, User.id == comment_table.c.author_id).where(comment_table.c.ad_id == ad_id)
     )
 
-    comments_with_emails = result.all()
-
-    return [
+    comments = [
         CommentRead(
             id=comment_id,
             text=comment_text,
             created_at=comment_created_at,
             author_email=user_email,
-        ) for comment_id, comment_text, comment_created_at, user_email in comments_with_emails
+        ) for comment_id, comment_text, comment_created_at, user_email in result.all()
     ]
+
+    return pagination.paginate_items(comments)
 
 
 @router.post('/create')
