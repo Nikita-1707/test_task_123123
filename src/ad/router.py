@@ -15,7 +15,7 @@ router = APIRouter(
     tags=['Ads']
 )
 
-report_router = APIRouter(
+router_report = APIRouter(
     prefix='/report',
     tags=['Reports']
 )
@@ -143,7 +143,7 @@ async def delete_ad(
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
-@report_router.post('/create')
+@router_report.post('/create')
 async def create_report(
     request: Request,
     user: User = Depends(current_user),
@@ -164,7 +164,7 @@ async def create_report(
     return Response(status_code=status.HTTP_201_CREATED)
 
 
-@report_router.get('/{ad_id}')
+@router_report.get('/{ad_id}')
 async def get_reports_by_ad_id(
     request: Request,
     ad_id: int,
