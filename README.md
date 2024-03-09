@@ -4,6 +4,8 @@ This repository contains the Test Task for InlyIT, designed to demonstrate our d
 
 Api spec in file openapi.json
 
+!!! Replace values in .env file !!! 
+
 ## Getting Started
 
 These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.
