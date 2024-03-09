@@ -1,8 +1,8 @@
 from typing import List
 
-from fastapi import APIRouter, Request, Depends, HTTPException, status
+from fastapi import APIRouter, Request, Depends, HTTPException, status, Response
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.future import select
+from sqlalchemy import delete, select, and_
 
 from ad.models import ad_table
 from ad.schemas import AdRead, AdCreate
@@ -54,7 +54,7 @@ async def get_all_ads(
     if not ad:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail='Item not found',
+            detail='Ad not found',
         )
 
     return AdRead(
@@ -81,3 +81,33 @@ async def create_ad(
     await session.commit()
 
     return 'Ad created successfully'
+
+
+@router.delete('/{ad_id}')
+async def delete_ad(
+    ad_id: int,
+    user: User = Depends(current_user),
+    session: AsyncSession = Depends(get_async_session),
+):
+    cond = and_(
+        ad_table.c.id == ad_id,
+        ad_table.c.author_id == user.id,
+    )
+
+    result = await session.execute(
+        select(ad_table).where(cond)
+    )
+    ad_to_delete = result.scalar_one_or_none()
+
+    if not ad_to_delete:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail='Ad not found'
+        )
+
+    await session.execute(
+        delete(ad_table).where(cond)
+    )
+    await session.commit()
+
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
