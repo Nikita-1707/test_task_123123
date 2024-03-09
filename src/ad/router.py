@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Request, Depends, HTTPException, status, Response
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import delete, select, true
+from sqlalchemy import delete, select, true, update
 
 from ad.models import ad_table, AdFieldsForSorting, report_table, ReportFieldsForSorting
 from ad.schemas import AdRead, AdCreate, AdTypeEnum, ReportCreate, ReportRead
@@ -24,7 +24,7 @@ router_report = APIRouter(
 async def get_ad_by_id(
     session: AsyncSession,
     ad_id: int,
-) -> AdRead:
+):
     result = await session.execute(
         select(ad_table).where(ad_table.c.id == ad_id)
     )
@@ -37,11 +37,7 @@ async def get_ad_by_id(
             detail='Ad not found',
         )
 
-    return AdRead(
-        id=ad.id,
-        title=ad.title,
-        description=ad.description,
-    )
+    return ad
 
 
 @router.get(
@@ -69,6 +65,7 @@ async def get_all_ads(
         AdRead(
             id=ad.id,
             title=ad.title,
+            type=ad.type,
             description=ad.description,
         ) for ad in result.all()
     ]
@@ -85,7 +82,14 @@ async def get_ad(
     ad_id: int,
     session: AsyncSession = Depends(get_async_session),
 ):
-    return get_ad_by_id(session, ad_id)
+    ad = await get_ad_by_id(session, ad_id)
+
+    return AdRead(
+        id=ad.id,
+        title=ad.title,
+        type=ad.type,
+        description=ad.description,
+    )
 
 
 @router.post('/create')
@@ -107,18 +111,42 @@ async def create_ad(
     return Response(status_code=status.HTTP_201_CREATED)
 
 
+@router.post('/change_type/{ad_id}')
+async def change_ad_type(
+    request: Request,
+    ad_id: int,
+    new_type: AdTypeEnum,
+    user: User = Depends(current_user),
+    session: AsyncSession = Depends(get_async_session),
+):
+    ad = await get_ad_by_id(session, ad_id)
+
+    if (
+        not user.if_admin
+        and ad.author_id != user.id
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail='You do not have enough permissions to perform this operation.'
+        )
+
+    await session.execute(
+        update(ad_table).where(ad_table.c.id == ad_id).values(
+            type=new_type,
+        )
+    )
+    await session.commit()
+
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
 @router.delete('/{ad_id}')
 async def delete_ad(
     ad_id: int,
     user: User = Depends(current_user),
     session: AsyncSession = Depends(get_async_session),
 ):
-    cond = ad_table.c.id == ad_id
-
-    result = await session.execute(
-        select(ad_table).where(cond)
-    )
-    ad_to_delete = result.one_or_none()
+    ad_to_delete = await get_ad_by_id(session, ad_id)
 
     if not ad_to_delete:
         raise HTTPException(
@@ -136,7 +164,7 @@ async def delete_ad(
         )
 
     await session.execute(
-        delete(ad_table).where(cond)
+        delete(ad_table).where(ad_table.c.id == ad_id)
     )
     await session.commit()
 

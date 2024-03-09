@@ -17,6 +17,7 @@ class AdCreate(BaseModel):
 class AdRead(BaseModel):
     id: int
     title: str
+    type: AdTypeEnum
     description: str
 
 

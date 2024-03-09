@@ -6,7 +6,7 @@ from fastapi_cache.backends.redis import RedisBackend
 from redis import asyncio as aioredis
 
 from ad.router import router as router_ad, router_report
-from admin.routes import router as router_admin
+from admin.router import router as router_admin
 from auth.base_config import auth_backend, fastapi_users
 from auth.schemas import UserCreate, UserRead
 from comment.router import router as router_comment
