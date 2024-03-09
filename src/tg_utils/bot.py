@@ -1,4 +1,5 @@
 from functools import wraps
+from fastapi import HTTPException
 
 from telegram import Bot
 
@@ -25,6 +26,10 @@ def send_message_on_exception(func):
     async def wrapper(*args, **kwargs):
         try:
             return await func(*args, **kwargs)
+
+        except HTTPException:
+            raise
+
         except Exception as e:
             await send_message(
                 text='Test Task system got critical error',

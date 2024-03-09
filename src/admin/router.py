@@ -114,6 +114,6 @@ async def _change_user_is_active(
     await session.commit()
 
     temp = 'unbanned' if new_is_active else 'banned'
-    logger.info(f'User {user_id} are {temp} new')
+    logger.info(f'User {user_id} are {temp} now')
 
     return Response(status_code=status.HTTP_204_NO_CONTENT)
