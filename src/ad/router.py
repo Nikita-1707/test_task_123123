@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Request, Depends, HTTPException, status, Response
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import delete, select
+from sqlalchemy import delete, select, true
 
 from ad.models import ad_table
-from ad.schemas import AdRead, AdCreate
+from ad.schemas import AdRead, AdCreate, AdTypeEnum
 from auth.base_config import current_user
 from auth.models import User
 from auth.utils import admin_role_id
@@ -47,9 +47,12 @@ async def get_all_ads(
     request: Request,
     session: AsyncSession = Depends(get_async_session),
     pagination: Pagination = Depends(),
+    ad_type: AdTypeEnum = '',
 ):
+    cond = ad_table.c.type == ad_type if ad_type else true()
+
     result = await session.execute(
-        select(ad_table)
+        select(ad_table).where(cond)
     )
     ads = [
         AdRead(
