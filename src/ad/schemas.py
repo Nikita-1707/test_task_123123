@@ -18,3 +18,15 @@ class AdRead(BaseModel):
     id: int
     title: str
     description: str
+
+
+class ReportCreate(BaseModel):
+    message: str
+    ad_id: int
+
+
+class ReportRead(BaseModel):
+    id: int
+    message: str
+    ad_id: int
+    reporter_id: int

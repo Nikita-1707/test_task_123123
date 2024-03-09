@@ -51,6 +51,15 @@ def upgrade() -> None:
     )
 
     op.create_table(
+        'report',
+        sa.Column('id', sa.Integer(), nullable=False),
+        sa.Column('message', sa.String(), nullable=False),
+        sa.Column('reporter_id', sa.Integer(), sa.ForeignKey('user.id'), nullable=False),
+        sa.Column('ad_id', sa.Integer(), sa.ForeignKey('ad.id', ondelete='CASCADE'), nullable=False),
+        sa.PrimaryKeyConstraint('id')
+    )
+
+    op.create_table(
         'comment',
         sa.Column('id', sa.Integer(), nullable=False),
         sa.Column('text', sa.String(), nullable=False),

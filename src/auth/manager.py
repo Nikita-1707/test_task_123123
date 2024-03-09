@@ -10,7 +10,8 @@ from fastapi_users import (
 )
 
 from auth.models import User
-from auth.utils import get_user_db, user_role_id
+from auth.utils import get_user_db
+from auth.constants import user_role_id
 from config import SECRET_AUTH
 
 

@@ -12,6 +12,7 @@ from sqlalchemy import (
     Table,
 )
 
+from auth.constants import admin_role_id
 from database import Base, metadata
 
 client_role = Table(
@@ -35,3 +36,7 @@ class User(SQLAlchemyBaseUserTable[int], Base):
     is_active: bool = Column(Boolean, default=True, nullable=False)
     is_superuser: bool = Column(Boolean, default=False, nullable=False)
     is_verified: bool = Column(Boolean, default=False, nullable=False)
+
+    @property
+    def if_admin(self) -> bool:
+        return self.role_id == admin_role_id

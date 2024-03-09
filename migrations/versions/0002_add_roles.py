@@ -7,8 +7,8 @@ Create Date: 2024-03-08 13:39:11.240642
 """
 from alembic import op
 
+from auth.constants import user_role_id, admin_role_id
 from auth.models import client_role
-from auth.utils import user_role_id, admin_role_id
 
 # revision identifiers, used by Alembic.
 revision = 'e4783e8ba21b'

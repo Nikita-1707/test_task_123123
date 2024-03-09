@@ -10,11 +10,11 @@ from redis import asyncio as aioredis
 from auth.base_config import auth_backend, fastapi_users, current_user
 from auth.models import User
 from auth.schemas import UserCreate, UserRead
-from auth.utils import admin_role_id
+from auth.constants import admin_role_id
 from config import REDIS_HOST, REDIS_PORT
 from database import get_async_session
 from pages.router import router as router_pages
-from ad.router import router as router_ad
+from ad.router import router as router_ad, report_router
 from comment.router import router as router_comment
 
 app = FastAPI(
@@ -36,6 +36,7 @@ app.include_router(
 
 app.include_router(router_pages)
 app.include_router(router_ad)
+app.include_router(report_router)
 app.include_router(router_comment)
 
 app.add_middleware(

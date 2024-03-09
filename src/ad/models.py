@@ -32,7 +32,23 @@ ad_table = Table(
 )
 
 
-class FieldsForSorting(str, Enum):
+class AdFieldsForSorting(str, Enum):
     id = 'id'
     title = 'title'
     type = 'type'
+
+
+report_table = Table(
+    'report',
+    metadata,
+    Column('id', Integer, primary_key=True),
+    Column('message', String, nullable=False),
+    Column('reporter_id', ForeignKey(User.id)),
+    Column('ad_id', ForeignKey(ad_table.c.id, ondelete='CASCADE')),
+)
+
+
+class ReportFieldsForSorting(str, Enum):
+    id = 'id'
+    message = 'message'
+    reporter_id = 'reporter_id'
