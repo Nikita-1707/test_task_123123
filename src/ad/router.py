@@ -1,3 +1,5 @@
+from logger import logger
+
 from fastapi import APIRouter, Request, Depends, HTTPException, status, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import delete, select, true, update
@@ -70,6 +72,8 @@ async def get_all_ads(
         ) for ad in result.all()
     ]
 
+    logger.info(f'Return {len(ads)} ads')
+
     return pagination.paginate_items(ads)
 
 
@@ -83,6 +87,8 @@ async def get_ad(
     session: AsyncSession = Depends(get_async_session),
 ):
     ad = await get_ad_by_id(session, ad_id)
+
+    logger.info(f'Return ad: {ad}')
 
     return AdRead(
         id=ad.id,
@@ -107,6 +113,8 @@ async def create_ad(
     )
     await session.execute(new_ad)
     await session.commit()
+
+    logger.info(f'Created ad: {new_ad}')
 
     return Response(status_code=status.HTTP_201_CREATED)
 
@@ -136,6 +144,8 @@ async def change_ad_type(
         )
     )
     await session.commit()
+
+    logger.info(f'Ad type changed to {new_type} for {ad_id}')
 
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
@@ -168,6 +178,8 @@ async def delete_ad(
     )
     await session.commit()
 
+    logger.info(f'Deleted ad: {ad_id}')
+
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
@@ -188,6 +200,8 @@ async def create_report(
     )
     await session.execute(new_ad)
     await session.commit()
+
+    logger.info(f'Report created')
 
     return Response(status_code=status.HTTP_201_CREATED)
 
@@ -229,5 +243,7 @@ async def get_reports_by_ad_id(
             reporter_id=user.id,
         ) for report in result.all()
     ]
+
+    logger.info(f'Gor {len(reports)} report for ad {ad_id}')
 
     return pagination.paginate_items(reports)

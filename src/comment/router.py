@@ -1,3 +1,5 @@
+from logger import logger
+
 from fastapi import APIRouter, Request, Depends, HTTPException, status, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import delete, select
@@ -58,6 +60,8 @@ async def get_comments_by_ad_id(
         ) for comment_id, comment_text, comment_created_at, user_email in result.all()
     ]
 
+    logger.info(f'Got {len(comments)} comments')
+
     return pagination.paginate_items(comments)
 
 
@@ -75,6 +79,8 @@ async def create_comment(
     )
     await session.execute(new_comment)
     await session.commit()
+
+    logger.info('Created comment')
 
     return Response(status_code=status.HTTP_201_CREATED)
 
@@ -108,5 +114,7 @@ async def delete_comment(
         delete(comment_table).where(cond)
     )
     await session.commit()
+
+    logger.info(f'Comment {comment_id} deleted')
 
     return Response(status_code=status.HTTP_204_NO_CONTENT)

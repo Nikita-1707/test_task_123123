@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status, Response
 from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from logger import logger
 from auth.base_config import current_user
 from auth.constants import admin_role_id
 from auth.models import User
@@ -43,6 +44,8 @@ async def add_user_to_admin(
         )
     )
     await session.commit()
+
+    logger.info(f'User {user_id} are admin now')
 
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
@@ -105,5 +108,8 @@ async def _change_user_is_active(
         )
     )
     await session.commit()
+
+    temp = 'unbanned' if new_is_active else 'banned'
+    logger.info(f'User {user_id} are {temp} new')
 
     return Response(status_code=status.HTTP_204_NO_CONTENT)
