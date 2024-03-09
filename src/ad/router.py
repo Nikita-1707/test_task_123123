@@ -1,6 +1,6 @@
 from typing import List
 
-from fastapi import APIRouter, Request, Depends
+from fastapi import APIRouter, Request, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
@@ -34,6 +34,34 @@ async def get_all_ads(
             description=ad.description,
         ) for ad in result.all()
     ]
+
+
+@router.get(
+    '/{ad_id}',
+    response_model=AdRead,
+)
+async def get_all_ads(
+    request: Request,
+    ad_id: int,
+    session: AsyncSession = Depends(get_async_session),
+):
+    result = await session.execute(
+        select(ad_table).where(ad_table.c.id == ad_id)
+    )
+
+    ad = result.one_or_none()
+
+    if not ad:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail='Item not found',
+        )
+
+    return AdRead(
+        id=ad.id,
+        title=ad.title,
+        description=ad.description,
+    )
 
 
 @router.post('/create')
