@@ -11,7 +11,6 @@ from auth.base_config import auth_backend, fastapi_users
 from auth.schemas import UserCreate, UserRead
 from comment.router import router as router_comment
 from config import REDIS_HOST, REDIS_PORT
-from pages.router import router as router_pages
 
 app = FastAPI(
     title='Test Task'
@@ -34,7 +33,6 @@ app.include_router(router_admin)
 app.include_router(router_ad)
 app.include_router(router_comment)
 app.include_router(router_report)
-app.include_router(router_pages)
 
 app.add_middleware(
     CORSMiddleware,

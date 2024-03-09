@@ -11,6 +11,7 @@ from auth.models import User
 from database import get_async_session
 from pagination import Pagination, PaginatedResponse
 from sorter import Sorter
+from tg_utils.bot import send_message_on_exception
 
 router = APIRouter(
     prefix='/ad',
@@ -46,6 +47,7 @@ async def get_ad_by_id(
     '/',
     response_model=PaginatedResponse[AdRead],
 )
+@send_message_on_exception
 async def get_all_ads(
     request: Request,
     session: AsyncSession = Depends(get_async_session),
@@ -81,6 +83,7 @@ async def get_all_ads(
     '/{ad_id}',
     response_model=AdRead,
 )
+@send_message_on_exception
 async def get_ad(
     request: Request,
     ad_id: int,
@@ -99,6 +102,7 @@ async def get_ad(
 
 
 @router.post('/create')
+@send_message_on_exception
 async def create_ad(
     request: Request,
     user: User = Depends(current_user),
@@ -120,6 +124,7 @@ async def create_ad(
 
 
 @router.post('/change_type/{ad_id}')
+@send_message_on_exception
 async def change_ad_type(
     request: Request,
     ad_id: int,
@@ -151,6 +156,7 @@ async def change_ad_type(
 
 
 @router.delete('/{ad_id}')
+@send_message_on_exception
 async def delete_ad(
     ad_id: int,
     user: User = Depends(current_user),
@@ -184,6 +190,7 @@ async def delete_ad(
 
 
 @router_report.post('/create')
+@send_message_on_exception
 async def create_report(
     request: Request,
     user: User = Depends(current_user),
@@ -207,6 +214,7 @@ async def create_report(
 
 
 @router_report.get('/{ad_id}')
+@send_message_on_exception
 async def get_reports_by_ad_id(
     request: Request,
     ad_id: int,

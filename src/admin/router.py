@@ -7,6 +7,7 @@ from auth.base_config import current_user
 from auth.constants import admin_role_id
 from auth.models import User
 from database import get_async_session
+from tg_utils.bot import send_message_on_exception
 
 router = APIRouter(
     prefix='/admin',
@@ -15,6 +16,7 @@ router = APIRouter(
 
 
 @router.post('/{user_id}')
+@send_message_on_exception
 async def add_user_to_admin(
     user_id: int,
     user: User = Depends(current_user),
@@ -51,6 +53,7 @@ async def add_user_to_admin(
 
 
 @router.post('/{user_id}/ban')
+@send_message_on_exception
 async def ban_user(
     user_id: int,
     user: User = Depends(current_user),
@@ -65,6 +68,7 @@ async def ban_user(
 
 
 @router.post('/{user_id}/unban')
+@send_message_on_exception
 async def unbun_user(
     user_id: int,
     user: User = Depends(current_user),

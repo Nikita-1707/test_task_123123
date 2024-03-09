@@ -12,6 +12,7 @@ from comment.schemas import CommentRead, CommentCreate
 from database import get_async_session
 from pagination import Pagination, PaginatedResponse
 from sorter import Sorter
+from tg_utils.bot import send_message_on_exception
 
 router = APIRouter(
     prefix='/comment',
@@ -23,6 +24,7 @@ router = APIRouter(
     '/',
     response_model=PaginatedResponse[CommentRead],
 )
+@send_message_on_exception
 async def get_comments_by_ad_id(
     request: Request,
     ad_id: int,
@@ -66,6 +68,7 @@ async def get_comments_by_ad_id(
 
 
 @router.post('/create')
+@send_message_on_exception
 async def create_comment(
     request: Request,
     user: User = Depends(current_user),
@@ -86,6 +89,7 @@ async def create_comment(
 
 
 @router.delete('/{comment_id}')
+@send_message_on_exception
 async def delete_comment(
     comment_id: int,
     user: User = Depends(current_user),
