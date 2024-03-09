@@ -10,6 +10,7 @@ from auth.schemas import UserCreate, UserRead
 from config import REDIS_HOST, REDIS_PORT
 from pages.router import router as router_pages
 from ad.router import router as router_ad
+from comment.router import router as router_comment
 
 app = FastAPI(
     title='Test Task'
@@ -30,6 +31,7 @@ app.include_router(
 
 app.include_router(router_pages)
 app.include_router(router_ad)
+app.include_router(router_comment)
 
 
 app.add_middleware(

@@ -2,7 +2,7 @@ from typing import List
 
 from fastapi import APIRouter, Request, Depends, HTTPException, status, Response
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import delete, select, and_
+from sqlalchemy import delete, select
 
 from ad.models import ad_table
 from ad.schemas import AdRead, AdCreate
@@ -14,6 +14,29 @@ router = APIRouter(
     prefix='/ad',
     tags=['Ads']
 )
+
+
+async def get_ad_by_id(
+    session: AsyncSession,
+    ad_id: int,
+) -> AdRead:
+    result = await session.execute(
+        select(ad_table).where(ad_table.c.id == ad_id)
+    )
+
+    ad = result.one_or_none()
+
+    if not ad:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail='Ad not found',
+        )
+
+    return AdRead(
+        id=ad.id,
+        title=ad.title,
+        description=ad.description,
+    )
 
 
 @router.get(
@@ -40,28 +63,12 @@ async def get_all_ads(
     '/{ad_id}',
     response_model=AdRead,
 )
-async def get_all_ads(
+async def get_ad(
     request: Request,
     ad_id: int,
     session: AsyncSession = Depends(get_async_session),
 ):
-    result = await session.execute(
-        select(ad_table).where(ad_table.c.id == ad_id)
-    )
-
-    ad = result.one_or_none()
-
-    if not ad:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail='Ad not found',
-        )
-
-    return AdRead(
-        id=ad.id,
-        title=ad.title,
-        description=ad.description,
-    )
+    return get_ad_by_id(session, ad_id)
 
 
 @router.post('/create')
@@ -80,7 +87,7 @@ async def create_ad(
     await session.execute(new_ad)
     await session.commit()
 
-    return 'Ad created successfully'
+    return Response(status_code=status.HTTP_201_CREATED)
 
 
 @router.delete('/{ad_id}')
@@ -89,20 +96,28 @@ async def delete_ad(
     user: User = Depends(current_user),
     session: AsyncSession = Depends(get_async_session),
 ):
-    cond = and_(
-        ad_table.c.id == ad_id,
-        ad_table.c.author_id == user.id,
-    )
+    cond = ad_table.c.id == ad_id
 
     result = await session.execute(
         select(ad_table).where(cond)
     )
-    ad_to_delete = result.scalar_one_or_none()
+    ad_to_delete = result.one_or_none()
+
+    if_admin = user.role_id == 2
 
     if not ad_to_delete:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail='Ad not found'
+        )
+
+    if (
+        not if_admin
+        and ad_to_delete.author_id != user.id
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail='You do not have enough permissions to perform this operation',
         )
 
     await session.execute(

@@ -1,4 +1,4 @@
-"""Database cretion
+"""Add roles
 
 Revision ID: e4783e8ba21b
 Revises: 

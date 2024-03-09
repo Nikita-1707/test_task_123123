@@ -1,4 +1,4 @@
-"""Database cretion
+"""Create Database
 
 Revision ID: e4783e8ba21a
 Revises: 
@@ -56,7 +56,7 @@ def upgrade() -> None:
         sa.Column('text', sa.String(), nullable=False),
         sa.Column('created_at', sa.DateTime(), default=func.now(), nullable=False),
         sa.Column('author_id', sa.Integer(), sa.ForeignKey('user.id'), nullable=False),
-        sa.Column('ad_id', sa.Integer(), sa.ForeignKey('ad.id'), nullable=False),
+        sa.Column('ad_id', sa.Integer(), sa.ForeignKey('ad.id', ondelete='CASCADE'), nullable=False),
         sa.PrimaryKeyConstraint('id')
     )
     # ### end Alembic commands ###
